@@ -141,6 +141,121 @@ class BinanceServer {
                     },
                 },
                 {
+                    name: 'get_wallet_balances',
+                    description: 'Get the BTC-valued balance summary for all Binance Global wallets (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {},
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_api_restrictions',
+                    description: 'Get permissions enabled for the connected Binance Global API key (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {},
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_funding_wallet',
+                    description: 'Get Funding wallet asset balances (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            asset: {
+                                type: 'string',
+                                description: 'Optional asset symbol, e.g. USDT',
+                            },
+                            needBtcValuation: {
+                                type: 'boolean',
+                                description: 'Include BTC valuation (default true)',
+                            },
+                        },
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_simple_earn_account',
+                    description: 'Get aggregate Simple Earn balances (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {},
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_simple_earn_flexible_positions',
+                    description: 'Get Simple Earn flexible positions (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            asset: { type: 'string', description: 'Optional asset symbol' },
+                            productId: { type: 'string', description: 'Optional product ID' },
+                            current: { type: 'number', description: 'Page number (default 1)' },
+                            size: { type: 'number', description: 'Page size (max 100)' },
+                        },
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_simple_earn_locked_positions',
+                    description: 'Get Simple Earn locked positions (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            asset: { type: 'string', description: 'Optional asset symbol' },
+                            positionId: { type: 'string', description: 'Optional position ID' },
+                            projectId: { type: 'string', description: 'Optional project ID' },
+                            current: { type: 'number', description: 'Page number (default 1)' },
+                            size: { type: 'number', description: 'Page size (max 100)' },
+                        },
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_usdm_futures_balances',
+                    description: 'Get USD-margined futures balances (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {},
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_coinm_futures_balances',
+                    description: 'Get COIN-margined futures balances (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {},
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_cross_margin_account',
+                    description: 'Get cross-margin balances and liabilities (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {},
+                        required: [],
+                    },
+                },
+                {
+                    name: 'get_isolated_margin_account',
+                    description: 'Get isolated-margin balances and liabilities (read-only)',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            symbols: {
+                                type: 'string',
+                                description: 'Optional comma-separated symbols, e.g. BTCUSDT,ETHUSDT',
+                            },
+                        },
+                        required: [],
+                    },
+                },
+                {
                     name: 'get_my_trades',
                     description: 'Get trades for a specific symbol',
                     inputSchema: {
@@ -528,6 +643,68 @@ class BinanceServer {
                                     text: JSON.stringify(accountInfo, null, 2),
                                 },
                             ],
+                        };
+                    }
+                    case 'get_wallet_balances': {
+                        const walletBalances = await this.binanceApi.getWalletBalances();
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(walletBalances, null, 2) }],
+                        };
+                    }
+                    case 'get_api_restrictions': {
+                        const restrictions = await this.binanceApi.getApiRestrictions();
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(restrictions, null, 2) }],
+                        };
+                    }
+                    case 'get_funding_wallet': {
+                        const { asset, needBtcValuation } = request.params.arguments;
+                        const fundingAssets = await this.binanceApi.getFundingWallet(asset, needBtcValuation);
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(fundingAssets, null, 2) }],
+                        };
+                    }
+                    case 'get_simple_earn_account': {
+                        const earnAccount = await this.binanceApi.getSimpleEarnAccount();
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(earnAccount, null, 2) }],
+                        };
+                    }
+                    case 'get_simple_earn_flexible_positions': {
+                        const positions = await this.binanceApi.getSimpleEarnFlexiblePositions(request.params.arguments);
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(positions, null, 2) }],
+                        };
+                    }
+                    case 'get_simple_earn_locked_positions': {
+                        const positions = await this.binanceApi.getSimpleEarnLockedPositions(request.params.arguments);
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(positions, null, 2) }],
+                        };
+                    }
+                    case 'get_usdm_futures_balances': {
+                        const balances = await this.binanceApi.getUsdmFuturesBalances();
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(balances, null, 2) }],
+                        };
+                    }
+                    case 'get_coinm_futures_balances': {
+                        const balances = await this.binanceApi.getCoinmFuturesBalances();
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(balances, null, 2) }],
+                        };
+                    }
+                    case 'get_cross_margin_account': {
+                        const account = await this.binanceApi.getCrossMarginAccount();
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(account, null, 2) }],
+                        };
+                    }
+                    case 'get_isolated_margin_account': {
+                        const { symbols } = request.params.arguments;
+                        const account = await this.binanceApi.getIsolatedMarginAccount(symbols);
+                        return {
+                            content: [{ type: 'text', text: JSON.stringify(account, null, 2) }],
                         };
                     }
                     case 'get_my_trades': {

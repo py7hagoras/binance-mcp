@@ -166,6 +166,21 @@ export interface WithdrawResponse {
   id: string;
 }
 
+export interface EarnPositionParams {
+  asset?: string;
+  current?: number;
+  size?: number;
+}
+
+export interface FlexibleEarnPositionParams extends EarnPositionParams {
+  productId?: string;
+}
+
+export interface LockedEarnPositionParams extends EarnPositionParams {
+  positionId?: string;
+  projectId?: string;
+}
+
 export class BinanceAPI {
   private baseUrl = 'https://api.binance.com';
   private apiKey: string;
@@ -332,6 +347,61 @@ export class BinanceAPI {
       console.error('Error getting account info:', error);
       throw error;
     }
+  }
+
+  /** Get the BTC-valued balance summary for every activated Binance wallet. */
+  async getWalletBalances(): Promise<any[]> {
+    return this.signedGet('/sapi/v1/asset/wallet/balance');
+  }
+
+  /** Get the permissions currently enabled for this API key. */
+  async getApiRestrictions(): Promise<any> {
+    return this.signedGet('/sapi/v1/account/apiRestrictions');
+  }
+
+  /** Get assets held in the Funding wallet. */
+  async getFundingWallet(asset?: string, needBtcValuation = true): Promise<any[]> {
+    const params: Record<string, string> = {
+      needBtcValuation: needBtcValuation ? 'true' : 'false',
+    };
+    if (asset) params.asset = asset;
+
+    return this.signedPost('/sapi/v1/asset/get-funding-asset', params);
+  }
+
+  /** Get aggregate Simple Earn balances. */
+  async getSimpleEarnAccount(): Promise<any> {
+    return this.signedGet('/sapi/v1/simple-earn/account');
+  }
+
+  /** Get Simple Earn flexible positions. */
+  async getSimpleEarnFlexiblePositions(params: FlexibleEarnPositionParams = {}): Promise<any> {
+    return this.signedGet('/sapi/v1/simple-earn/flexible/position', { ...params });
+  }
+
+  /** Get Simple Earn locked positions. */
+  async getSimpleEarnLockedPositions(params: LockedEarnPositionParams = {}): Promise<any> {
+    return this.signedGet('/sapi/v1/simple-earn/locked/position', { ...params });
+  }
+
+  /** Get USD-margined futures asset balances. */
+  async getUsdmFuturesBalances(): Promise<any[]> {
+    return this.signedGet('/fapi/v3/balance', {}, 'https://fapi.binance.com');
+  }
+
+  /** Get COIN-margined futures asset balances. */
+  async getCoinmFuturesBalances(): Promise<any[]> {
+    return this.signedGet('/dapi/v1/balance', {}, 'https://dapi.binance.com');
+  }
+
+  /** Get cross-margin account balances and liabilities. */
+  async getCrossMarginAccount(): Promise<any> {
+    return this.signedGet('/sapi/v1/margin/account');
+  }
+
+  /** Get isolated-margin account balances and liabilities. */
+  async getIsolatedMarginAccount(symbols?: string): Promise<any> {
+    return this.signedGet('/sapi/v1/margin/isolated/account', symbols ? { symbols } : {});
   }
 
   /**
@@ -663,6 +733,34 @@ export class BinanceAPI {
       console.error('Error submitting withdrawal:', error);
       throw error;
     }
+  }
+
+  private async signedGet(
+    path: string,
+    params: Record<string, unknown> = {},
+    baseURL?: string
+  ): Promise<any> {
+    const requestParams = { ...params, timestamp: Date.now() };
+    const signature = this.generateSignature(requestParams);
+    const response = await this.client.get(path, {
+      baseURL,
+      params: { ...requestParams, signature },
+    });
+    return response.data;
+  }
+
+  private async signedPost(
+    path: string,
+    params: Record<string, unknown> = {},
+    baseURL?: string
+  ): Promise<any> {
+    const requestParams = { ...params, timestamp: Date.now() };
+    const signature = this.generateSignature(requestParams);
+    const response = await this.client.post(path, null, {
+      baseURL,
+      params: { ...requestParams, signature },
+    });
+    return response.data;
   }
 
   /**
