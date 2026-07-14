@@ -12,10 +12,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
-    "axios": "^1.8.4",
+    "axios": "^1.18.1",
     "crypto-js": "^4.2.0",
     "typescript": "^5.8.3"
   }
