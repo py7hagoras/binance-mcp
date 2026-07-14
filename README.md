@@ -317,6 +317,21 @@ Get account information including balances.
 }
 ```
 
+#### Read-only wallet and permission tools
+
+- `get_wallet_balances`: BTC-valued summary for all Binance Global wallets.
+- `get_api_restrictions`: API-key read, trade, futures, margin, transfer, and withdrawal permissions.
+- `get_funding_wallet`: Funding wallet balances; optionally filter by `asset`.
+- `get_simple_earn_account`: Aggregate Simple Earn balance.
+- `get_simple_earn_flexible_positions`: Flexible Earn positions; supports `asset`, `productId`, `current`, and `size` filters.
+- `get_simple_earn_locked_positions`: Locked Earn positions; supports `asset`, `positionId`, `projectId`, `current`, and `size` filters.
+- `get_usdm_futures_balances`: USDⓈ-M Futures asset balances.
+- `get_coinm_futures_balances`: COIN-M Futures asset balances.
+- `get_cross_margin_account`: Cross Margin balances and liabilities.
+- `get_isolated_margin_account`: Isolated Margin balances and liabilities; optionally filter by comma-separated `symbols`.
+
+These tools never place orders, transfer assets, subscribe to Earn products, or change account settings. Product-specific API permissions may still be required by Binance.
+
 #### get_my_trades
 
 Get trades for a specific symbol.
